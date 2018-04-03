@@ -8,7 +8,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 
 import org.springframework.hateoas.ResourceSupport;
 
@@ -21,6 +20,7 @@ import advanceWar.player.Player;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 
 @Entity
 public  class  Partie extends ResourceSupport {
@@ -39,7 +39,7 @@ public  class  Partie extends ResourceSupport {
 	
 	
 	@JsonIgnore
-    @OneToOne(cascade=CascadeType.ALL)
+    @OneToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
      private Historique historique;
     
     
@@ -107,11 +107,26 @@ public  class  Partie extends ResourceSupport {
 		historique.actualise(tour);
 
 		//TODO lancer une notification
+		current.notifyPlayer("C'est a votre tour de jouer");
 	}
 	Partie(){}
 	@JsonIgnore
 	public Historique getHistorique() {
 		return this.historique;
+	}
+	
+	/**
+	 * Finie la partie est la désenregistre des joueurs 
+	 * Appeler par l'historique 
+	 */
+	public void finish() {
+		for (Player player : players) {
+			player.suppPartie(this);
+			for (Player playerO : players) {
+				playerO.notifyPlayer("Partie Fini");
+			}
+			//TODO Score ou quelque chose comme ca 
+		}
 	}
 	
 }

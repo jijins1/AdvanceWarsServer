@@ -1,19 +1,15 @@
 package advanceWar.historique;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
-import javax.persistence.Basic;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
-import javax.persistence.PostUpdate;
-import javax.persistence.Version;
-
-import org.hibernate.annotations.Tuplizer;
+import org.springframework.data.domain.Persistable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,12 +17,16 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import advanceWar.player.Player;
  @Entity
-public class Unit {
+public class Unit implements Persistable<Integer> {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Integer id;
 	@JsonSerialize
-	@ManyToOne(cascade=CascadeType.ALL)
+	@ManyToOne(cascade=CascadeType.ALL,fetch=FetchType.EAGER)
 	private Player player;
 	
 	@JsonSerialize
@@ -65,11 +65,7 @@ public class Unit {
 		
 	}
 	
-	public void damage(int atk) {
-		this.pv=pv-atk;
-		UnitFactory.getInstance().updateUnit(this);
-		
-	}
+	
 	public void mouv(int mouv) {
 		 
 	}
@@ -100,14 +96,54 @@ public class Unit {
 	public void setPos(Position pos) {
 		this.pos = pos;
 	}
+	@Override
 	@JsonSerialize
-	public int getId() {
+	public Integer getId() {
+		
 		return id;
 	}
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return " type : "+type.getType()+" Player : "+player.getName()+ " id="+id+" Pos="+pos ;
+		return " type : "+type.getType()+" Player : "+player.getName()+ " id="+id+" Pos="+pos+" PV="+ this.pv ;
 	}
 	
+	public Player getPlayer() {
+		return this.player;
+	}
+	public void reducePv(int degat) {
+		int result=this.pv-degat;
+		if(result<0) {
+			result=0;
+		}
+		
+		this.pv=result;
+		try {
+			UnitFactory.getInstance().updateUnit(this);
+
+		} catch (Exception e) {
+			System.out.println("ERROR Unit");
+		}
+	}
+	
+	@Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (id == null || obj == null || getClass() != obj.getClass())
+            return false;
+        Unit that = (Unit) obj;
+        return id.equals(that.id);
+    }
+    @Override
+    public int hashCode() {
+        return id == null ? 0 : id.hashCode();
+    }
+
+	
+	
+	@Override
+	public boolean isNew() {
+		// TODO Auto-generated method stub
+		return null==UnitFactory.getInstance().getUnitId(id);
+	}
 }

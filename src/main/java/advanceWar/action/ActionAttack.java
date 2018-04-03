@@ -57,7 +57,7 @@ public class ActionAttack extends Action{
 	
 	@Override
 	public void apply(List<Unit> units) {
-		// TODO Auto-generated method stub
+		ennemies.reducePv(degat);
 		
 	}
 }

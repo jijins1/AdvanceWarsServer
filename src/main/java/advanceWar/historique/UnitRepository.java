@@ -7,4 +7,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface UnitRepository extends CrudRepository<Unit, Long>  {
 	Optional<Unit> findById(int Id);
+	Unit save(Unit persisted);
 }

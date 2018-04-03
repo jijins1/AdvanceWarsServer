@@ -1,23 +1,23 @@
 package advanceWar.player;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-
-import org.hibernate.cfg.NotYetImplementedException;
+import org.hibernate.annotations.Fetch;
 import org.springframework.hateoas.ResourceSupport;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.Message;
 
 import advanceWar.partie.Partie;
 
@@ -28,9 +28,9 @@ public class Player extends ResourceSupport {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer id;
 	
+	private String token;
 	
-	
-	@ManyToMany
+	@ManyToMany(fetch=FetchType.LAZY)
 	private List<Partie> parties;
 	
     private String name;
@@ -46,7 +46,10 @@ public class Player extends ResourceSupport {
     public Player(@JsonProperty("name") String s,@JsonProperty("id") int id) {
     	
     }
-	
+	/**
+	 * 
+	 * @param p ajoute la partie p a la liste des partie en cours 
+	 */
     public void addPartie(Partie p) {
     	parties.add(p);
     }
@@ -99,6 +102,46 @@ public class Player extends ResourceSupport {
 		return false;
 		
 	}
+	public void suppPartie(Partie partie) {
+		parties.remove(partie);
+	}
+
+	public void setToken(String token) {
+		this.token=token;
+	}
+
+	public String getToken() {
+		return token;
+	}
+	
+	/**
+	 * Notifie le joueur sur son dernier Device Connu
+	 * @param texte le message à envoer au joueur
+	 */
+	public void notifyPlayer(String texte)  {
+		if(this.token==null) {
+			return;
+		}
+		Message message=Message.builder()
+				.putData(this.name, texte)
+				.setToken(token)
+				.build();
+
+		// registration token.
+		String response;
+		try {
+			response = FirebaseMessaging.getInstance().sendAsync(message).get();
+			// Response is a message ID string.
+			System.out.println("Successfully sent message: " + response);
+
+		
+		} catch (InterruptedException | ExecutionException e) {
+			System.out.println("ERROR notification");
+			e.printStackTrace();
+		}
+		
+	}
+	
 
 	
 }

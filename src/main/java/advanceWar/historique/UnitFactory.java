@@ -24,7 +24,8 @@ public class UnitFactory {
 	}
 	
 	public Unit getUnitId(int id) {
-		return unitRepository.findById(id).get();
+		return unitRepository.findById(id).orElse(null);
 	}
+	
 
 }

@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.cloud.storage.Acl.User;
 
 import advanceWar.partie.Partie;
 import advanceWar.player.Player;
@@ -67,16 +70,28 @@ public class PlayerController {
 		// This returns a JSON or XML with the users
 		return userRepository.findAll();
 	}
-	
-	private void validateUser(int userId) {
-		this.userRepository.findById(userId).orElseThrow(
+	/**
+	 * Verifie si un User est bien dans la base de donnée
+	 * @param userId User à verifier
+	 */
+	private Player validateUser(int userId) {
+		return this.userRepository.findById(userId).orElseThrow(
 				() -> new PlayerNotFoundException(userId));
 	}
-	private void validateUser(String playerName) {
-		this.userRepository.findByName(playerName).orElseThrow(
+	
+	/**
+	 * Verifie si un User est bien dans la base de donnée
+	 * @param playerName User à verifier
+	 */
+	private Player validateUser(String playerName) {
+		return this.userRepository.findByName(playerName).orElseThrow(
 				() -> new PlayerNotFoundException(playerName));
 	}
 	
-	
+	@PostMapping(path="/{userId/token}")
+	public void postTokent( @PathVariable int userId ,@RequestParam String token) {
+		Player us=validateUser(userId);
+		us.setToken(token);
+	}
 	
 }
