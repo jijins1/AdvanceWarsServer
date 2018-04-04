@@ -1,19 +1,27 @@
 package advanceWar;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import advanceWar.historique.Unit;
+import advanceWar.historique.UnitFactory;
 import advanceWar.player.Player;
 
 public class State {
 	private List<Unit> units;
 	public State(List<Unit> units) {
+		
 		this.units=units;
+		
 	}
+	@JsonProperty
 	public List<Unit> getUnits() {
-		return units;
+		
+		return this.units;
 	}
 	public void setUnits(List<Unit> units) {
 		this.units = units;
